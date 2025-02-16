@@ -1,10 +1,12 @@
 # Parallelism Theory Tasks
 
-This repository contains various tasks related to the **Parallelism Theory**. The `main.cpp` file is used for the core functionality of each task, and there are two branches for different build systems: `make` and `cmake`. This README file provides instructions for building the project using each system.
+This repository contains various tasks related to the **Parallelism Theory**. 
 
 ## Task 1
 
 ### Project Structure
+
+There are two branches for different build systems: `make` and `cmake`. This README file provides instructions for building the project using each system.
 
 - `main.cpp`: The main source code file for the project.
 - `Makefile`: Build file for the `make` system located in the `make` branch.
@@ -23,10 +25,25 @@ The `make` branch contains the `Makefile` for building the project using the `ma
     ```bash
     git checkout make
     ```
-2. Compile the project using the `make` command:
+
     ```bash
-    make
+    cd task1
     ```
+
+2. Compile the project using the `make` command:
+    
+    With double type
+
+    ```bash
+    make TYPE=double
+    ```
+
+    With float type
+
+    ```bash
+    make 
+    ```
+
    This will compile the `main.cpp` file and generate the executable `sum_sin`.
 
 #### `cmake` Branch
@@ -37,21 +54,28 @@ The `cmake` branch contains the `CMakeLists.txt` file for building the project u
     ```bash
     git checkout cmake
     ```
+
+    ```bash
+    cd task1
+    ```
+
 2. Create a build directory and configure the project with `CMake`:
+
+    with double type
+
     ```bash
     mkdir build
-    cd build
-    cmake ..
+    cmake -S . -B build -D TYPE=double
+    cmake --build ./build
     ```
-3. Compile the project:
+
+    with float type
+
     ```bash
-    make
+    mkdir build
+    cmake -S . -B build
+    cmake --build ./build
     ```
+
    This will compile the `main.cpp` file and generate the executable `sum_sin`.
 
-## Notes
-
-- If you want to switch between the `make` and `cmake` branches, ensure that all untracked changes are either committed or stashed to avoid conflicts.
-- Each build system has its own specific setup, but both will produce the same executable `sum_sin` from the `main.cpp` file.
-
-Feel free to modify and extend the `README.md` based on your future needs.
