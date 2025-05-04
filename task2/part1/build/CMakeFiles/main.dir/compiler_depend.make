@@ -70,19 +70,8 @@ CMakeFiles/main.dir/main.cpp.o: ../main.cpp \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib.h \
   /usr/include/c++/11/bits/std_abs.h \
-  /usr/lib/gcc/x86_64-linux-gnu/11/include/omp.h \
-  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h \
-  /usr/include/stdint.h \
-  /usr/include/x86_64-linux-gnu/bits/wchar.h \
-  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/inttypes.h
+  /usr/lib/gcc/x86_64-linux-gnu/11/include/omp.h
 
-
-/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
-
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
-
-/usr/include/stdint.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/omp.h:
 
@@ -95,8 +84,6 @@ CMakeFiles/main.dir/main.cpp.o: ../main.cpp \
 /usr/include/x86_64-linux-gnu/bits/floatn.h:
 
 /usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
-
-/usr/include/inttypes.h:
 
 /usr/include/x86_64-linux-gnu/gnu/stubs.h:
 
@@ -149,8 +136,6 @@ CMakeFiles/main.dir/main.cpp.o: ../main.cpp \
 /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
 
 /usr/include/x86_64-linux-gnu/sys/cdefs.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
 

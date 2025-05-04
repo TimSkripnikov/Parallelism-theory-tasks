@@ -1,6 +1,6 @@
 CMakeFiles/main.dir/main.cpp.o: \
- /home/a.skripnikov/tasks/task2/task\ 2/main.cpp \
- /usr/include/stdc-predef.h /usr/include/stdio.h \
+ /home/a.skripnikov/tasks/task2/part2/main.cpp /usr/include/stdc-predef.h \
+ /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
@@ -99,8 +99,4 @@ CMakeFiles/main.dir/main.cpp.o: \
  /usr/include/c++/11/tr1/poly_hermite.tcc \
  /usr/include/c++/11/tr1/poly_laguerre.tcc \
  /usr/include/c++/11/tr1/riemann_zeta.tcc \
- /usr/lib/gcc/x86_64-linux-gnu/11/include/omp.h /usr/include/time.h \
- /usr/include/x86_64-linux-gnu/bits/time.h \
- /usr/include/x86_64-linux-gnu/bits/timex.h \
- /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h \
- /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/omp.h

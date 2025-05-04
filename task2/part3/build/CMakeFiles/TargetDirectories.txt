@@ -1,3 +1,4 @@
-/home/a.skripnikov/tasks/task2/part3/build/CMakeFiles/main.dir
+/home/a.skripnikov/tasks/task2/part3/build/CMakeFiles/main1.dir
+/home/a.skripnikov/tasks/task2/part3/build/CMakeFiles/main2.dir
 /home/a.skripnikov/tasks/task2/part3/build/CMakeFiles/edit_cache.dir
 /home/a.skripnikov/tasks/task2/part3/build/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,1 @@
+g++  -fopenmp -O2 CMakeFiles/main1.dir/main1.cpp.o -o bin/main1 

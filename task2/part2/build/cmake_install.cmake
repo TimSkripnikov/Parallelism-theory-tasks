@@ -1,4 +1,4 @@
-# Install script for directory: /home/a.skripnikov/tasks/task2/task 2
+# Install script for directory: /home/a.skripnikov/tasks/task2/part2
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/a.skripnikov/tasks/task2/task 2/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/a.skripnikov/tasks/task2/part2/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
