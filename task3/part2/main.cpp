@@ -11,8 +11,8 @@
 #include <random>
 #include <cmath>
 #include <iomanip>
+#include <algorithm>
 
-// Функции для вычислений
 template<typename T>
 T fun_sin(T arg) {
     return std::sin(arg);
@@ -41,7 +41,10 @@ public:
     }
 
     void stop() {
-        running = false;
+        {
+            std::lock_guard<std::mutex> lock(mutex_queue);
+            running = false;
+        }
         cv.notify_all();
         if (worker.joinable()) worker.join();
     }
@@ -59,7 +62,7 @@ public:
 
     T request_result(size_t id) {
         std::future<T>& fut = results.at(id);
-        return fut.get();  // Блокирующий вызов
+        return fut.get();
     }
 
 private:
@@ -74,26 +77,33 @@ private:
     };
 
     void process_tasks() {
-        while (running) {
-            std::unique_lock<std::mutex> lock(mutex_queue);
-            cv.wait(lock, [&]() { return !tasks.empty() || !running; });
+        while (true) {
+            TaskItem item;
+            {
+                std::unique_lock<std::mutex> lock(mutex_queue);
+                cv.wait(lock, [&]() { return !tasks.empty() || !running; });
 
-            if (!tasks.empty()) {
-                TaskItem item = std::move(tasks.front());
+                if (!running && tasks.empty()) break;
+                if (tasks.empty()) continue;
+
+                item = std::move(tasks.front());
                 tasks.pop();
-                lock.unlock();
+            }
 
+            try {
                 T result = item.task();
                 item.prom.set_value(result);
 
-                // Записываем информацию в соответствующий файл
+                std::lock_guard<std::mutex> file_lock(file_mutex);
                 std::ofstream fout(item.filename, std::ios::app);
-                fout << std::fixed << std::setprecision(6); // Одинаковая точность
+                fout << std::fixed << std::setprecision(6);
                 fout << item.operation << " " << item.arg1;
                 if (item.operation == "pow") {
                     fout << " " << item.arg2;
                 }
                 fout << " = " << result << "\n";
+            } catch (...) {
+                item.prom.set_exception(std::current_exception());
             }
         }
     }
@@ -105,25 +115,25 @@ private:
     std::queue<TaskItem> tasks;
     std::unordered_map<size_t, std::future<T>> results;
     std::mutex mutex_queue;
+    std::mutex file_mutex;
     std::condition_variable cv;
 };
 
-// Аргумент filename добавлен
 void client(TaskServer<double>& server, int task_type, int N, const std::string& filename) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.1, 10.0);
 
     for (int i = 0; i < N; ++i) {
-        if (task_type == 1) {  // sin
+        if (task_type == 1) {
             double val = dis(gen);
-            server.add_task([val]() { return std::sin(val); }, "sin", val, 0.0, filename);
-        } else if (task_type == 2) {  // sqrt
+            server.add_task([val]() { return fun_sin(val); }, "sin", val, 0.0, filename);
+        } else if (task_type == 2) {
             double val = dis(gen);
-            server.add_task([val]() { return std::sqrt(val); }, "sqrt", val, 0.0, filename);
-        } else if (task_type == 3) {  // pow
+            server.add_task([val]() { return fun_sqrt(val); }, "sqrt", val, 0.0, filename);
+        } else if (task_type == 3) {
             double base = dis(gen), exp = dis(gen);
-            server.add_task([base, exp]() { return std::pow(base, exp); }, "pow", base, exp, filename);
+            server.add_task([base, exp]() { return fun_pow(base, exp); }, "pow", base, exp, filename);
         }
     }
 }
@@ -132,7 +142,11 @@ int main() {
     TaskServer<double> server;
     server.start();
 
-    const int N = 10000;  // Число задач для каждого клиента
+    const int N = 100;
+
+    std::ofstream("sin_output.txt", std::ios::trunc).close();
+    std::ofstream("sqrt_output.txt", std::ios::trunc).close();
+    std::ofstream("pow_output.txt", std::ios::trunc).close();
 
     std::thread client1(client, std::ref(server), 1, N, "sin_output.txt");
     std::thread client2(client, std::ref(server), 2, N, "sqrt_output.txt");
@@ -143,6 +157,17 @@ int main() {
     client3.join();
 
     server.stop();
+
+
+    auto count_lines = [](const std::string& filename) {
+        std::ifstream fin(filename);
+        return std::count(std::istreambuf_iterator<char>(fin),
+                        std::istreambuf_iterator<char>(), '\n');
+    };
+
+    std::cout << "sin_output.txt lines: " << count_lines("sin_output.txt") << std::endl;
+    std::cout << "sqrt_output.txt lines: " << count_lines("sqrt_output.txt") << std::endl;
+    std::cout << "pow_output.txt lines: " << count_lines("pow_output.txt") << std::endl;
 
     return 0;
 }
