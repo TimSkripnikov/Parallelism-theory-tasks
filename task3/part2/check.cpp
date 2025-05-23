@@ -5,14 +5,12 @@
 #include <string>
 #include <iomanip>
 
-// Function to compare two floating-point numbers with absolute and relative error
 bool is_equal(double a, double b, double eps = 1e-6) {
     if (std::fabs(a - b) < eps) return true;
     double rel_err = std::fabs(a - b) / std::max(std::fabs(a), std::fabs(b));
     return rel_err < 1e-4;
 }
 
-// Check one output file
 void check_file(const std::string& filename) {
     std::ifstream fin(filename);
     if (!fin.is_open()) {
@@ -26,8 +24,10 @@ void check_file(const std::string& filename) {
 
     while (std::getline(fin, line)) {
         ++line_num;
+
         std::istringstream iss(line);
         std::string op;
+        
         double arg1, arg2 = 0.0, expected;
 
         iss >> op >> arg1;

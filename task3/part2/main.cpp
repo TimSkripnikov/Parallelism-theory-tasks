@@ -49,13 +49,12 @@ public:
         if (worker.joinable()) worker.join();
     }
 
-    size_t add_task(Task task, const std::string& operation, double arg1, double arg2,
-                    const std::string& filename) {
+    size_t add_task(Task task) {
         std::lock_guard<std::mutex> lock(mutex_queue);
         size_t id = task_id++;
         std::promise<T> prom;
         results[id] = prom.get_future();
-        tasks.push({id, std::move(task), std::move(prom), operation, arg1, arg2, filename});
+        tasks.push({id, std::move(task), std::move(prom)});
         cv.notify_one();
         return id;
     }
@@ -70,10 +69,6 @@ private:
         size_t id;
         Task task;
         std::promise<T> prom;
-        std::string operation;
-        double arg1;
-        double arg2;
-        std::string filename;
     };
 
     void process_tasks() {
@@ -91,17 +86,8 @@ private:
             }
 
             try {
-                T result = item.task();
+                T result = item.task();  
                 item.prom.set_value(result);
-
-                std::lock_guard<std::mutex> file_lock(file_mutex);
-                std::ofstream fout(item.filename, std::ios::app);
-                fout << std::fixed << std::setprecision(6);
-                fout << item.operation << " " << item.arg1;
-                if (item.operation == "pow") {
-                    fout << " " << item.arg2;
-                }
-                fout << " = " << result << "\n";
             } catch (...) {
                 item.prom.set_exception(std::current_exception());
             }
@@ -115,7 +101,6 @@ private:
     std::queue<TaskItem> tasks;
     std::unordered_map<size_t, std::future<T>> results;
     std::mutex mutex_queue;
-    std::mutex file_mutex;
     std::condition_variable cv;
 };
 
@@ -124,17 +109,40 @@ void client(TaskServer<double>& server, int task_type, int N, const std::string&
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.1, 10.0);
 
+    std::vector<size_t> ids;
+    std::vector<std::tuple<std::string, double, double>> args;
+
     for (int i = 0; i < N; ++i) {
         if (task_type == 1) {
             double val = dis(gen);
-            server.add_task([val]() { return fun_sin(val); }, "sin", val, 0.0, filename);
+            size_t id = server.add_task([val]() { return fun_sin(val); });
+            ids.push_back(id);
+            args.emplace_back("sin", val, 0.0);
         } else if (task_type == 2) {
             double val = dis(gen);
-            server.add_task([val]() { return fun_sqrt(val); }, "sqrt", val, 0.0, filename);
+            size_t id = server.add_task([val]() { return fun_sqrt(val); });
+            ids.push_back(id);
+            args.emplace_back("sqrt", val, 0.0);
         } else if (task_type == 3) {
             double base = dis(gen), exp = dis(gen);
-            server.add_task([base, exp]() { return fun_pow(base, exp); }, "pow", base, exp, filename);
+            size_t id = server.add_task([base, exp]() { return fun_pow(base, exp); });
+            ids.push_back(id);
+            args.emplace_back("pow", base, exp);
         }
+    }
+
+    std::ofstream fout(filename, std::ios::app);
+    fout << std::fixed << std::setprecision(6);
+
+    
+    for (size_t i = 0; i < ids.size(); ++i) {
+        double result = server.request_result(ids[i]);
+        const auto& [operation, arg1, arg2] = args[i];
+        fout << operation << " " << arg1;
+        if (operation == "pow") {
+            fout << " " << arg2;
+        }
+        fout << " = " << result << "\n";
     }
 }
 
@@ -144,6 +152,7 @@ int main() {
 
     const int N = 100;
 
+    
     std::ofstream("sin_output.txt", std::ios::trunc).close();
     std::ofstream("sqrt_output.txt", std::ios::trunc).close();
     std::ofstream("pow_output.txt", std::ios::trunc).close();
@@ -158,11 +167,10 @@ int main() {
 
     server.stop();
 
-
     auto count_lines = [](const std::string& filename) {
         std::ifstream fin(filename);
         return std::count(std::istreambuf_iterator<char>(fin),
-                        std::istreambuf_iterator<char>(), '\n');
+                          std::istreambuf_iterator<char>(), '\n');
     };
 
     std::cout << "sin_output.txt lines: " << count_lines("sin_output.txt") << std::endl;
