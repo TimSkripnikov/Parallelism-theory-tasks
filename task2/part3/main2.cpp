@@ -9,7 +9,7 @@ void run_solve(std::vector<std::vector<double>> &A, std::vector<double> &b, std:
 {
     printf("Num threads: %d\n", num_threads);
     int n = b.size();
-    double t = 0.00016;
+    double t = 0.0001;
     double eps = 0.000001;
     double criterion;
     //int num_iters = 0;

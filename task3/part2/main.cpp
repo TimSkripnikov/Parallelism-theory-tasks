@@ -147,10 +147,16 @@ void client(TaskServer<double>& server, int task_type, int N, const std::string&
 }
 
 int main() {
+
+    using clock = std::chrono::high_resolution_clock;
+
     TaskServer<double> server;
+
+    auto start = clock::now();
+
     server.start();
 
-    const int N = 100;
+    const int N = 10000;
 
     
     std::ofstream("sin_output.txt", std::ios::trunc).close();
@@ -167,6 +173,10 @@ int main() {
 
     server.stop();
 
+    auto end = clock::now();
+
+    std::chrono::duration<double> elapsed = end - start;
+
     auto count_lines = [](const std::string& filename) {
         std::ifstream fin(filename);
         return std::count(std::istreambuf_iterator<char>(fin),
@@ -176,6 +186,9 @@ int main() {
     std::cout << "sin_output.txt lines: " << count_lines("sin_output.txt") << std::endl;
     std::cout << "sqrt_output.txt lines: " << count_lines("sqrt_output.txt") << std::endl;
     std::cout << "pow_output.txt lines: " << count_lines("pow_output.txt") << std::endl;
+
+    std::cout << "Total execution time: " << elapsed.count() << " seconds\n";
+
 
     return 0;
 }

@@ -29,12 +29,15 @@ void run_solve(std::vector<std::vector<double>> &A, std::vector<double> &b, std:
         }
 
         num = 0.0, denum = 0.0;
+
+
         #pragma omp parallel for reduction(+:num, denum)
         for (int i = 0; i < n; ++i) {
             double sum = 0.0;
             for (int j = 0; j < n; ++j) {
                 sum += A[i][j] * x[j];
             }
+            
             double diff = sum - b[i];
             num += diff * diff;
             denum += b[i] * b[i];
@@ -89,6 +92,7 @@ int main()
     }
 
     run_solve(A, b, x, thread_counts[0], &time_serial);
+    
     results[0] = time_serial;
 
     for (int i = 1; i < 8; ++i)

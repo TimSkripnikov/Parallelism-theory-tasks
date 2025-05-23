@@ -137,3 +137,7 @@ if __name__ == "__main__":
     main()
 
 
+#python3 main.py --camera /dev/video0 --size 640x480 --fps 30
+
+
+

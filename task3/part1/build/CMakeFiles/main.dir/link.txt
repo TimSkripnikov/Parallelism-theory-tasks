@@ -1,1 +1,0 @@
-/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin/nvc++ -fast -O3 -DNDEBUG CMakeFiles/main.dir/main.cpp.o -o bin/main 
