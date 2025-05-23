@@ -47,8 +47,6 @@ class WindowImage():
     def __init__(self, fps: int):
         self.delay = int(1000/fps)
 
-
-
     def show(self, image):
         cv2.imshow("Camera", image)
         key = cv2.waitKey(self.delay) & 0xFF
@@ -78,14 +76,15 @@ def main():
     parser.add_argument("--fps", type=int, default=30)
     args = parser.parse_args()
 
-    res = tuple(map(int, args.resolution.split("x")))
+    res = tuple(map(int, args.size.split("x")))
     logging.basicConfig(filename="log/app.log", level=logging.INFO)
 
     try:
-
         cam_sensor = SensorCam(args.camera, res)
-    except Exception:
+    except Exception as e:
+        logging.exception(f"Failed to initialize camera: {e}")
         return
+
 
     sensor0 = SensorX(0.01)
     sensor1 = SensorX(0.1)
@@ -96,6 +95,7 @@ def main():
     stop_event = threading.Event()
 
     threads = []
+
     for s, q in zip(sensors, queues):
         t = threading.Thread(target=sensor_worker, args=(s, q, stop_event))
         t.start()
