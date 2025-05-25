@@ -82,6 +82,7 @@ private:
                 if (tasks.empty()) continue;
 
                 item = std::move(tasks.front());
+                
                 tasks.pop();
             }
 

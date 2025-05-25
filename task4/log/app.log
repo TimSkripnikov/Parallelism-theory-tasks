@@ -1,0 +1,10 @@
+ERROR:root:Camera read error.
+ERROR:root:Sensor error: Failed to read from camera.
+ERROR:root:Camera not found.
+ERROR:root:Failed to initialize camera: Camera init failed
+Traceback (most recent call last):
+  File "/home/artem/Documents/2_course/parallel/Parallelism-theory-tasks/task4/main.py", line 83, in main
+    cam_sensor = SensorCam(args.camera, res)
+  File "/home/artem/Documents/2_course/parallel/Parallelism-theory-tasks/task4/main.py", line 31, in __init__
+    raise RuntimeError("Camera init failed")
+RuntimeError: Camera init failed
