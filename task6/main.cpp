@@ -67,7 +67,7 @@ int main(int argc, const char** argv) {
     int num_iters = vm["num_iters"].as<int>();
     double eps = vm["eps"].as<double>();
 
-    acc_set_device_num(3, acc_device_nvidia);
+    acc_set_device_num(0, acc_device_nvidia);
 
     double error = 1.0;
     int iters = 0;
@@ -114,9 +114,11 @@ int main(int argc, const char** argv) {
                 #pragma acc update self(error)
             }
 
-            double* temp = currentMatrix;
+            double* tmp = currentMatrix;
             currentMatrix = previousMatrix;
-            previousMatrix = temp;
+            previousMatrix = tmp;
+
+            // std::swap(previousMatrix,currentMatrix);
     
             ++iters;
 
@@ -147,3 +149,6 @@ int main(int argc, const char** argv) {
 
     return 0;
 }
+
+
+// ./ --size 128 --num_iters 1000000 --eps 1e-6
