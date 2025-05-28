@@ -51,7 +51,7 @@ int main(int argc, const char** argv) {
     desc.add_options()
         ("help,h", "Show help message")
         ("size", bpo::value<int>()->default_value(128), "Grid size")
-        ("num_iters", bpo::value<int>()->default_value(1000000), "Max number of iterations")
+        ("num_iters", bpo::value<int>()->default_value(50), "Max number of iterations")
         ("eps", bpo::value<double>()->default_value(1e-6), "Desired precision");
 
     bpo::variables_map vm;
@@ -114,11 +114,11 @@ int main(int argc, const char** argv) {
                 #pragma acc update self(error)
             }
 
-            double* tmp = currentMatrix;
-            currentMatrix = previousMatrix;
-            previousMatrix = tmp;
+            // double* tmp = currentMatrix;
+            // currentMatrix = previousMatrix;
+            // previousMatrix = tmp;
 
-            // std::swap(previousMatrix,currentMatrix);
+            std::swap(previousMatrix,currentMatrix);
     
             ++iters;
 
