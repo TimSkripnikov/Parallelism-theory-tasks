@@ -114,11 +114,11 @@ int main(int argc, const char** argv) {
                 #pragma acc update self(error)
             }
 
-            // double* tmp = currentMatrix;
-            // currentMatrix = previousMatrix;
-            // previousMatrix = tmp;
+            double* tmp = currentMatrix;
+            currentMatrix = previousMatrix;
+            previousMatrix = tmp;
 
-            std::swap(previousMatrix,currentMatrix);
+          //  std::swap(previousMatrix,currentMatrix);
     
             ++iters;
 
