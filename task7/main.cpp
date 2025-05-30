@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <cassert>
 #include <openacc.h>
-#include <fstream>
+
 #include "cublas_v2.h"
 #include <boost/program_options.hpp>
 
@@ -67,7 +67,7 @@ int main(int argc, const char** argv) {
     int num_iters = vm["num_iters"].as<int>();
     double eps = vm["eps"].as<double>();
 
-    acc_set_device_num(0, acc_device_nvidia);
+    acc_set_device_num(2, acc_device_nvidia);
 
     cublasStatus_t status;
     cublasHandle_t cublasHandle;
@@ -135,6 +135,8 @@ int main(int argc, const char** argv) {
                         std::cerr << "CUBLAS_Dcopy failed\n";
                     }
                 }
+
+                
             }
 
             double* tmp = first_matrix;

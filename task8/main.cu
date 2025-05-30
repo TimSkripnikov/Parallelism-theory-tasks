@@ -53,25 +53,43 @@ void init(std::vector<double>& A, int size) {
 
 double compute_max_error(double* A, double* B, int N) {
     double* d_diff;
+
     cudaMalloc(&d_diff, N * sizeof(double));
 
     int threads = 256;
+
     int blocks = (N + threads - 1) / threads;
+
     compute_diff_kernel<<<blocks, threads>>>(d_diff, A, B, N);
 
-    void* d_temp_storage = nullptr;
 
+    void* d_temp_storage = nullptr;
     size_t temp_storage_bytes = 0;
+
+
     double* d_result;
     cudaMalloc(&d_result, sizeof(double));
 
-    cub::DeviceReduce::Max(d_temp_storage, temp_storage_bytes, d_diff, d_result, N);
+    cub::DeviceReduce::Max(
+        d_temp_storage, 
+        temp_storage_bytes, 
+        d_diff, 
+        d_result, 
+        N
+    );
 
     cudaMalloc(&d_temp_storage, temp_storage_bytes);
     
-    cub::DeviceReduce::Max(d_temp_storage, temp_storage_bytes, d_diff, d_result, N);
+    cub::DeviceReduce::Max(
+        d_temp_storage, 
+        temp_storage_bytes, 
+        d_diff, 
+        d_result, 
+        N
+    );
 
     double h_result;
+
     cudaMemcpy(&h_result, d_result, sizeof(double), cudaMemcpyDeviceToHost);
 
     cudaFree(d_diff);
@@ -117,40 +135,47 @@ int main(int argc, char** argv) {
     }
 
     int N = size * size;
+
     std::vector<double> host_A(N, 0.0), host_B(N, 0.0);
     init(host_A, size);
     init(host_B, size);
 
     double *d_A, *d_B;
+
     cudaMalloc(&d_A, N * sizeof(double));
     cudaMalloc(&d_B, N * sizeof(double));
+
     cudaMemcpy(d_A, host_A.data(), N * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_B, host_B.data(), N * sizeof(double), cudaMemcpyHostToDevice);
 
     dim3 block(16, 16);
     dim3 grid((size + block.x - 1) / block.x, (size + block.y - 1) / block.y);
 
-    int iters = 0, k = 10000;
+    int iters = 0;
+    int k = 10000;
     double error = 1.0;
 
     cudaStream_t stream;
-    cudaStreamCreate(&stream);
+    cudaStreamCreate(&stream);   //
 
     cudaGraph_t graph;
     cudaGraphExec_t instance;
 
     cudaStreamBeginCapture(stream, cudaStreamCaptureModeGlobal);
+
     for (int i = 0; i < k; ++i) {
         jacobi_kernel<<<grid, block, 0, stream>>>(d_B, d_A, size);
         std::swap(d_A, d_B);
     }
+
     cudaStreamEndCapture(stream, &graph);
     cudaGraphInstantiate(&instance, graph, nullptr, nullptr, 0);
 
     auto start = std::chrono::high_resolution_clock::now();
+
     while (iters < max_iters && error > eps) {
         cudaGraphLaunch(instance, stream);
-        cudaStreamSynchronize(stream);
+        cudaStreamSynchronize(stream);  //Ожидает завершения всех задач в stream, то есть ждет, пока GPU закончит вычисления, запущенные графом
 
         error = compute_max_error(d_A, d_B, N);
         std::swap(d_A, d_B);

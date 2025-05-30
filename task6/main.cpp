@@ -7,7 +7,6 @@
 #include <iomanip>
 #include <cassert>
 #include <openacc.h>
-#include <fstream>
 #include <boost/program_options.hpp>
 
 namespace bpo = boost::program_options;
@@ -85,6 +84,7 @@ int main(int argc, const char** argv) {
     #pragma acc data copyin(error, second_matrix[0:size * size], first_matrix[0:size * size])
     {
         while (iters < num_iters && error > eps) {
+            
             #pragma acc parallel loop independent collapse(2) present(first_matrix, second_matrix)
             for (size_t i = 1; i < size - 1; ++i) {
                 for (size_t j = 1; j < size - 1; ++j) {
