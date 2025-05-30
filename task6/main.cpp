@@ -30,7 +30,6 @@ void init(std::unique_ptr<double[]> &A, int size) {
     }
 }
 
-
 int save_to_file(const double* A, int size, const std::string& filename) {
     std::ofstream f(filename);
     if (!f.is_open()) return 1;
@@ -78,24 +77,22 @@ int main(int argc, const char** argv) {
     init(A, size);
     init(new_A, size);
 
-    
     auto start = std::chrono::high_resolution_clock::now();
 
-    double* currentMatrix = A.get();
-    double* previousMatrix = new_A.get();
+    double* first_matrix = A.get();
+    double* second_matrix = new_A.get();
 
-    #pragma acc data copyin(error, previousMatrix[0:size * size], currentMatrix[0:size * size])
+    #pragma acc data copyin(error, second_matrix[0:size * size], first_matrix[0:size * size])
     {
         while (iters < num_iters && error > eps) {
-            #pragma acc parallel loop independent collapse(2) present(currentMatrix, previousMatrix)
-
+            #pragma acc parallel loop independent collapse(2) present(first_matrix, second_matrix)
             for (size_t i = 1; i < size - 1; ++i) {
                 for (size_t j = 1; j < size - 1; ++j) {
-                    currentMatrix[i * size + j] = 0.25 * (
-                        previousMatrix[i * size + j + 1] + 
-                        previousMatrix[i * size + j - 1] + 
-                        previousMatrix[(i - 1) * size + j] + 
-                        previousMatrix[(i + 1) * size + j]
+                    first_matrix[i * size + j] = 0.25 * (
+                        second_matrix[i * size + j + 1] +
+                        second_matrix[i * size + j - 1] +
+                        second_matrix[(i - 1) * size + j] +
+                        second_matrix[(i + 1) * size + j]
                     );
                 }
             }
@@ -103,27 +100,25 @@ int main(int argc, const char** argv) {
             if ((iters + 1) % 10000 == 0) {
                 error = 0.0;
                 #pragma acc update device(error)
-                
-                #pragma acc parallel loop independent collapse(2) reduction(max:error) present(currentMatrix, previousMatrix)
+
+                #pragma acc parallel loop independent collapse(2) reduction(max:error) present(first_matrix, second_matrix)
                 for (size_t i = 1; i < size - 1; ++i) {
                     for (size_t j = 1; j < size - 1; ++j) {
-                        error = fmax(error, fabs(currentMatrix[i * size + j] - previousMatrix[i * size + j]));
+                        error = fmax(error, fabs(first_matrix[i * size + j] - second_matrix[i * size + j]));
                     }
                 }
 
                 #pragma acc update self(error)
             }
 
-            double* tmp = currentMatrix;
-            currentMatrix = previousMatrix;
-            previousMatrix = tmp;
+            double* tmp = first_matrix;
+            first_matrix = second_matrix;
+            second_matrix = tmp;
 
-          //  std::swap(previousMatrix,currentMatrix);
-    
             ++iters;
+        }
 
-            }
-        #pragma acc update self(currentMatrix[0:size * size])
+        #pragma acc update self(first_matrix[0:size * size])
     }
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -131,7 +126,7 @@ int main(int argc, const char** argv) {
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 
     std::cout << "Elapsed time (msec): " << elapsed << std::endl;
-    std::cout << "Iterations: " << iters + 1 << ", Error: " << error << std::endl;
+    std::cout << "Iterations: " << iters  << ", Error: " << error << std::endl;
 
     if (size == 13 || size == 10) {
         for (size_t i = 0; i < size; ++i) {
@@ -142,13 +137,10 @@ int main(int argc, const char** argv) {
         }
     }
 
-    save_to_file(currentMatrix, size, "output.txt");
-    
+    save_to_file(first_matrix, size, "output.txt");
+
     A = nullptr;
     new_A = nullptr;
 
     return 0;
 }
-
-
-// ./ --size 128 --num_iters 1000000 --eps 1e-6
