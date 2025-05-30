@@ -60,12 +60,15 @@ double compute_max_error(double* A, double* B, int N) {
     compute_diff_kernel<<<blocks, threads>>>(d_diff, A, B, N);
 
     void* d_temp_storage = nullptr;
+
     size_t temp_storage_bytes = 0;
     double* d_result;
     cudaMalloc(&d_result, sizeof(double));
 
     cub::DeviceReduce::Max(d_temp_storage, temp_storage_bytes, d_diff, d_result, N);
+
     cudaMalloc(&d_temp_storage, temp_storage_bytes);
+    
     cub::DeviceReduce::Max(d_temp_storage, temp_storage_bytes, d_diff, d_result, N);
 
     double h_result;

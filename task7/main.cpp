@@ -171,3 +171,5 @@ int main(int argc, const char** argv) {
 
     return 0;
 }
+
+//  nsys profile --output=full_report1 ./heat_gpu --size 512 --num_iters 100000
